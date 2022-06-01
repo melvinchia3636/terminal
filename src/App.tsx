@@ -1,34 +1,25 @@
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-unresolved */
 /* eslint-disable no-underscore-dangle */
-import axios from 'axios';
+
 import React, {
   ReactElement, useEffect, useRef, useState,
 } from 'react';
-import Typed from 'react-typed';
-import publicIp from 'public-ip';
+
+import whoAmI from './commands/whoami';
+import Banner from './commands/banner';
+import Resume from './commands/resume';
+import Email from './commands/email';
+import Github from './commands/github';
+import Command from './commands/help';
+import Clear from './commands/clear';
 
 const scrollToBottom = (id: string) => {
   const element = document.getElementById(id);
   if (element) element.scrollTop = element.scrollHeight + 100;
 };
 
-function Text({
-  text,
-  setShowInput,
-}: {
-  text: string[];
-  setShowInput: (_state: boolean) => void;
-}): ReactElement {
-  return (
-    <Typed
-      strings={text}
-      typeSpeed={0}
-      showCursor={false}
-      onComplete={() => setShowInput(true)}
-    />
-  );
-}
-
-const COMMANDS: {
+export const COMMANDS: {
   name: string;
   description: string;
   callback: (
@@ -39,34 +30,12 @@ const COMMANDS: {
   {
     name: 'clear',
     description: 'Clear the terminal',
-    callback: (_setContent, _setShowInput) => {
-      _setContent([]);
-      _setShowInput(true);
-    },
+    callback: Clear,
   },
   {
     name: 'help',
     description: 'Show list of available commands',
-    callback: (_setContent, _setShowInput) => {
-      _setContent((prevState: ReactElement[]) => [
-        ...prevState,
-        <br />,
-        <Text
-          setShowInput={_setShowInput}
-          text={[
-            COMMANDS.sort().map(
-              (command) => (
-                `<div class="flex">
-                  <p class="w-32 text-yellow-400 drop-shadow-[0_0_2px_rgb(234,279,8)]">${command.name}</p>
-                  ${command.description}
-                </div>`
-              ),
-            ).join(''),
-          ]}
-        />,
-        <br />,
-      ]);
-    },
+    callback: Command,
   },
   {
     name: 'socialmedia',
@@ -76,7 +45,7 @@ const COMMANDS: {
   {
     name: 'github',
     description: 'Show my github profile',
-    callback: () => {},
+    callback: Github,
   },
   {
     name: 'tree',
@@ -86,12 +55,12 @@ const COMMANDS: {
   {
     name: 'email',
     description: 'Show my email address',
-    callback: () => {},
+    callback: Email,
   },
   {
     name: 'resume',
     description: 'Show download link of my resume',
-    callback: () => {},
+    callback: Resume,
   },
   {
     name: 'normal',
@@ -116,37 +85,7 @@ const COMMANDS: {
   {
     name: 'banner',
     description: 'Display the header',
-    callback: (_setContent, _setShowInput) => {
-      _setContent((prevState: ReactElement[]) => [
-        ...prevState,
-        <Text
-          setShowInput={_setShowInput}
-          text={[
-            `
-          Session Contents Restored on 27 May 2022 at 4:37 PM<br/>
-          Last login: Thu May 26 22:04:35 on ttys000<br/>
-          <br/>
-          Copyright (c) thecodeblog.net. All rights reserved.<br/><br/>
-          <span class="font-[Monospace] drop-shadow-[0_0_2px_rgb(234,279,8)] text-yellow-400">
-          ╭━━━━┳╮╱╭┳━━━┳━━━┳━━━┳━━━┳━━━┳━━╮╭╮╱╱╭━━━┳━━━╮╱╱╭━╮╱╭┳━━━┳━━━━╮<br class="h-0 block -mt-1" />
-          ┃╭╮╭╮┃┃╱┃┃╭━━┫╭━╮┃╭━╮┣╮╭╮┃╭━━┫╭╮┃┃┃╱╱┃╭━╮┃╭━╮┃╱╱┃┃╰╮┃┃╭━━┫╭╮╭╮┃<br class="h-0 block -mt-1" />
-          ╰╯┃┃╰┫╰━╯┃╰━━┫┃╱╰┫┃╱┃┃┃┃┃┃╰━━┫╰╯╰┫┃╱╱┃┃╱┃┃┃╱╰╯╱╱┃╭╮╰╯┃╰━━╋╯┃┃╰╯<br class="h-0 block -mt-1" />
-          ╱╱┃┃╱┃╭━╮┃╭━━┫┃╱╭┫┃╱┃┃┃┃┃┃╭━━┫╭━╮┃┃╱╭┫┃╱┃┃┃╭━╮╱╱┃┃╰╮┃┃╭━━╯╱┃┃<br class="h-0 block -mt-1" />
-          ╱╱┃┃╱┃┃╱┃┃╰━━┫╰━╯┃╰━╯┣╯╰╯┃╰━━┫╰━╯┃╰━╯┃╰━╯┃╰┻━┃╭╮┃┃╱┃┃┃╰━━╮╱┃┃<br class="h-0 block -mt-1" />
-          ╱╱╰╯╱╰╯╱╰┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━┻━━━╯╰╯╰╯╱╰━┻━━━╯╱╰╯<br />
-          </span><br/>
-          <p>Welcome to the ultimate interactive project explorer.</p>
-          <p>
-          For a list of available commands, type 
-          <span class="drop-shadow-[0_0_2px_rgb(234,279,8)] text-yellow-500">
-            'help'
-          </span>.
-        </p>
-        `,
-          ]}
-        />,
-      ]);
-    },
+    callback: Banner,
   },
   {
     name: 'history',
@@ -156,50 +95,12 @@ const COMMANDS: {
   {
     name: 'whois',
     description: 'Who is Melvin Chia?',
-    callback: () => {
-    },
+    callback: () => {},
   },
   {
     name: 'whoami',
     description: 'Who are you?',
-    callback: async (_setContent, _setShowInput) => {
-      const ip = await publicIp.v4();
-      const { data }: any = await axios.get(`https://cors-anywhere.thecodeblog.net/geolocation-db.com/json/${ip}`);
-      _setContent((prevState: ReactElement[]) => [
-        ...prevState,
-        <div>
-          <br />
-          IPv4 address:
-          {' '}
-          {data.IPv4}
-          <br />
-          country:
-          {' '}
-          {data.country_name}
-          <br />
-          city:
-          {' '}
-          {data.city}
-          <br />
-          postal code:
-          {' '}
-          {data.postal}
-          <br />
-          latitude:
-          {' '}
-          {data.latitude}
-          <br />
-          longitude:
-          {' '}
-          {data.longitude}
-          <br />
-          <br />
-          <p className="text-yellow-400 drop-shadow-[0_0_2px_rgb(234,279,8)]">Consider using a VPN? Just kidding lmao.</p>
-          <br />
-        </div>,
-      ]);
-      _setShowInput(true);
-    },
+    callback: whoAmI,
   },
 ];
 
@@ -221,7 +122,10 @@ function App() {
   };
 
   useEffect(() => {
-    COMMANDS.find(({ name }) => name === 'banner')?.callback(setContent, setShowInput);
+    COMMANDS.find(({ name }) => name === 'banner')?.callback(
+      setContent,
+      setShowInput,
+    );
 
     document.body.onkeydown = async (e: KeyboardEvent) => {
       e.preventDefault();
@@ -303,7 +207,10 @@ function App() {
   }, []);
 
   return (
-    <div id="terminal" className="w-full h-screen overflow-y-auto overflow-x-hidden bg-zinc-900 text-zinc-300 flex flex-col gap-1 p-4 text-sm font-['Jetbrains_Mono']">
+    <div
+      id="terminal"
+      className="w-full h-screen overflow-y-auto overflow-x-hidden bg-zinc-900 text-zinc-300 flex flex-col gap-1 p-4 text-sm font-['Jetbrains_Mono']"
+    >
       {content}
       <div className="flex items-center" id="input">
         {_showInput && (
@@ -311,7 +218,8 @@ function App() {
             <p className="text-green-400">visitor@thecodeblog.net:~$</p>
             <div
               className={`pl-2 pr-1 whitespace-pre ${
-                COMMANDS.findIndex(({ name }) => name === _command.trim()) !== -1
+                COMMANDS.findIndex(({ name }) => name === _command.trim())
+                !== -1
                   ? 'text-yellow-400'
                   : 'text-rose-400'
               }`}
